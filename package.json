@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "author": "prompt-vault team",
-  "description": "本地 AI 提示词管理工具",
+  "description": "Local AI prompt manager",
   "main": "electron/main.cjs",
   "type": "module",
   "scripts": {
@@ -12,7 +12,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "electron:dev": "concurrently -k \"vite\" \"wait-on http://localhost:5173 && electron .\"",
-    "electron:build": "pnpm build && electron-builder --win"
+    "electron:build": "node scripts/generate-icon.mjs && pnpm build && electron-builder --win --dir && node scripts/patch-exe-icon.mjs && electron-builder --prepackaged release/win-unpacked --win nsis"
   },
   "dependencies": {
     "element-plus": "^2.9.0",
@@ -28,6 +28,8 @@
     "electron": "^34.0.0",
     "electron-builder": "^25.1.8",
     "jsdom": "^25.0.1",
+    "png-to-ico": "^3.0.2",
+    "rcedit": "^5.0.2",
     "typescript": "~5.7.2",
     "vite": "^5.4.11",
     "vitest": "^2.1.8",
@@ -44,6 +46,12 @@
       "dist/**/*",
       "electron/**/*"
     ],
+    "extraResources": [
+      {
+        "from": "build/icon.ico",
+        "to": "icon.ico"
+      }
+    ],
     "icon": "build/icon.ico",
     "win": {
       "icon": "build/icon.ico",
@@ -58,7 +66,10 @@
       "allowToChangeInstallationDirectory": true,
       "installerIcon": "build/icon.ico",
       "uninstallerIcon": "build/icon.ico",
-      "shortcutName": "提示词库"
+      "shortcutName": "提示词库",
+      "createDesktopShortcut": false,
+      "createStartMenuShortcut": false,
+      "include": "build/installer.nsh"
     }
   }
 }
