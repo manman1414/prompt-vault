@@ -9,8 +9,10 @@ allowBuilds:
   electron: true
   esbuild: true
   vue-demi: true
+  sharp: true
 
 onlyBuiltDependencies:
   - electron
   - esbuild
   - vue-demi
+  - sharp

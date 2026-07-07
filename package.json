@@ -35,6 +35,7 @@
     "png-to-ico": "^3.0.2",
     "postcss": "^8.5.16",
     "rcedit": "^5.0.2",
+    "sharp": "^0.35.3",
     "tailwindcss": "^3.4.19",
     "typescript": "~5.7.2",
     "vite": "^5.4.11",
@@ -47,7 +48,10 @@
     "productName": "提示词库",
     "artifactName": "prompt-vault-setup-${version}.${ext}",
     "publish": null,
-    "electronLanguages": ["zh-CN", "en-US"],
+    "electronLanguages": [
+      "zh-CN",
+      "en-US"
+    ],
     "directories": {
       "output": "release"
     },
@@ -87,12 +91,16 @@
     "mac": {
       "icon": "build/icon-source.png",
       "category": "public.app-category.productivity",
-      "target": ["dmg"]
+      "target": [
+        "dmg"
+      ]
     },
     "linux": {
       "icon": "build/icon.png",
       "category": "Utility",
-      "target": ["AppImage"],
+      "target": [
+        "AppImage"
+      ],
       "executableName": "prompt-vault"
     }
   }

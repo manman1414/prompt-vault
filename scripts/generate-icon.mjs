@@ -1,27 +1,32 @@
 /**
- * Generate multi-size Windows icon from PNG
+ * Generate platform icons from PNG source
  * @author prompt-vault team
  * @date 2026-07-07
  */
 
 import fs from 'fs'
 import path from 'path'
-import { fileURLToPath } from 'url'
 import pngToIco from 'png-to-ico'
+import sharp from 'sharp'
+import { fileURLToPath } from 'url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const source = path.join(__dirname, '../build/icon-source.png')
-const target = path.join(__dirname, '../build/icon.ico')
+const icoTarget = path.join(__dirname, '../build/icon.ico')
+const pngTarget = path.join(__dirname, '../build/icon.png')
+const png512Target = path.join(__dirname, '../build/icon-512.png')
 
 if (!fs.existsSync(source)) {
   console.error('[generate-icon] missing build/icon-source.png')
   process.exit(1)
 }
 
-const buffer = await pngToIco(source)
-fs.writeFileSync(target, buffer)
-console.log('[generate-icon] wrote', target, `(${buffer.length} bytes)`)
+await sharp(source).resize(512, 512).png().toFile(png512Target)
+console.log('[generate-icon] wrote', png512Target)
 
-const pngTarget = path.join(__dirname, '../build/icon.png')
-fs.copyFileSync(source, pngTarget)
+await sharp(source).resize(256, 256).png().toFile(pngTarget)
 console.log('[generate-icon] wrote', pngTarget)
+
+const buffer = await pngToIco(png512Target)
+fs.writeFileSync(icoTarget, buffer)
+console.log('[generate-icon] wrote', icoTarget, `(${buffer.length} bytes)`)
