@@ -34,6 +34,9 @@ jobs:
             mv .npmrc.ci .npmrc
           fi
 
+      - name: Disable Electron sandbox on Linux CI
+        run: echo "ELECTRON_DISABLE_SANDBOX=1" >> "$GITHUB_ENV"
+
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec electron --version
 
@@ -85,6 +88,13 @@ jobs:
             grep -v 'electron_mirror\|electron_builder_binaries_mirror' .npmrc > .npmrc.ci || true
             mv .npmrc.ci .npmrc
           fi
+
+      - name: Configure Linux build environment
+        if: runner.os == 'Linux'
+        run: |
+          echo "ELECTRON_DISABLE_SANDBOX=1" >> "$GITHUB_ENV"
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-0 libnotify4 libnss3 libxss1 libxtst6 xdg-utils libatspi2.0-0 libdrm2 libgbm1 libxcb-dri3-0
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec electron --version
