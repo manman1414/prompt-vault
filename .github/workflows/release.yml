@@ -1,0 +1,59 @@
+# Release desktop installer on version tag
+# @author prompt-vault team
+# @date 2026-07-07
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Verify tag matches package.json version
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}" -replace '^v',''
+          $version = (Get-Content package.json | ConvertFrom-Json).version
+          if ($tag -ne $version) {
+            Write-Error "Tag v$tag does not match package.json version $version"
+            exit 1
+          }
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Build Windows installer
+        run: pnpm electron:build
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*.exe
+          generate_release_notes: true
+          draft: false
+          prerelease: false
