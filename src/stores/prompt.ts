@@ -85,6 +85,14 @@ export const usePromptStore = defineStore('prompt', () => {
     return prompts.value.find((item) => item.id === id) ?? null
   }
 
+  function isTitleTaken(title: string, excludeId?: string) {
+    const normalized = title.trim()
+    if (!normalized) return false
+    return prompts.value.some(
+      (item) => item.id !== excludeId && item.title.trim() === normalized,
+    )
+  }
+
   function filteredPrompts(category: string, keyword: string) {
     const q = keyword.trim().toLowerCase()
     return prompts.value.filter((item) => {
@@ -120,6 +128,7 @@ export const usePromptStore = defineStore('prompt', () => {
     updatePrompt,
     removePrompt,
     getById,
+    isTitleTaken,
     filteredPrompts,
     exportState,
     importState,

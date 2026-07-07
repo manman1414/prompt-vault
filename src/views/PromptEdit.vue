@@ -10,6 +10,7 @@ import Input from '@/components/ui/Input.vue'
 import Textarea from '@/components/ui/Textarea.vue'
 import { useToast } from '@/composables/useToast'
 import { usePromptStore } from '@/stores/prompt'
+import { DEFAULT_CATEGORIES } from '@/types'
 import { storeToRefs } from 'pinia'
 import { computed, onMounted, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -31,7 +32,7 @@ const form = reactive({
 })
 
 const categoryOptions = computed(() => {
-  const merged = new Set([...categories.value, form.category].filter(Boolean))
+  const merged = new Set([...DEFAULT_CATEGORIES, ...categories.value, form.category].filter(Boolean))
   return Array.from(merged)
 })
 
@@ -60,6 +61,12 @@ onMounted(() => {
 function handleSubmit() {
   if (!form.title.trim() || !form.content.trim()) {
     toast.warning('请填写标题和内容')
+    return
+  }
+
+  const excludeId = isEdit.value ? (route.params.id as string) : undefined
+  if (store.isTitleTaken(form.title, excludeId)) {
+    toast.warning('标题已存在，请使用其他名称')
     return
   }
 

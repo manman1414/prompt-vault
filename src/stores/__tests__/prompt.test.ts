@@ -32,4 +32,17 @@ describe('prompt store', () => {
     store.addPrompt({ title: 'Other', content: 'xyz', category: '其他', tags: [] })
     expect(store.filteredPrompts('', 'Vue')).toHaveLength(1)
   })
+
+  it('rejects duplicate titles', () => {
+    const store = usePromptStore()
+    store.addPrompt({ title: 'Same', content: 'A', category: '写作', tags: [] })
+    expect(store.isTitleTaken('Same')).toBe(true)
+    expect(store.isTitleTaken(' Same ')).toBe(true)
+  })
+
+  it('allows same title when editing current prompt', () => {
+    const store = usePromptStore()
+    const prompt = store.addPrompt({ title: 'Same', content: 'A', category: '写作', tags: [] })
+    expect(store.isTitleTaken('Same', prompt.id)).toBe(false)
+  })
 })

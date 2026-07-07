@@ -53,6 +53,39 @@ pnpm electron:build:linux   # Linux .AppImage
 - macOS：`~/Library/Application Support/提示词库/`
 - Linux：`~/.config/提示词库/`
 
+### 环境要求
+
+| 项目 | 要求 |
+|------|------|
+| Node.js / 编程环境 | 不需要，安装即用 |
+| 网络 | 不必须，纯本地运行 |
+| 磁盘空间 | 约 200 MB |
+| 内存 | 建议 4 GB 及以上 |
+
+| 平台 | 支持情况 |
+|------|----------|
+| Windows 10/11（64 位） | `.exe` 安装包 |
+| macOS 11+（Apple Silicon） | `.dmg` 安装包 |
+| Linux x64 | `.AppImage` |
+
+### 注意事项
+
+1. **桌面版与浏览器版数据不互通**  
+   桌面版数据保存在应用自己的目录，浏览器 `pnpm dev` 的数据在浏览器 localStorage 里，两者互不影响、也不会自动同步。
+
+2. **安装包未做代码签名**  
+   - Windows：首次安装可能弹出 SmartScreen 警告，需选择「仍要运行」  
+   - macOS：首次打开可能需在「系统设置 → 隐私与安全性」中允许运行
+
+3. **macOS 目前为 Apple Silicon（M 系列）版本**  
+   Intel 芯片 Mac 可能无法运行，如需支持可单独打 x64 包。
+
+4. **Linux AppImage 可能需要 FUSE**  
+   Ubuntu 22.04 等较新系统若无法运行，请先安装 `libfuse2`。
+
+5. **本地打包只生成当前平台安装包**  
+   `pnpm electron:build` 在 Windows 上只会产出 `.exe`；三平台安装包由 GitHub Actions 在发版时并行构建。
+
 ## 发版（GitHub Releases 自动打包）
 
 推送 `v*` 标签后，GitHub Actions 会自动：

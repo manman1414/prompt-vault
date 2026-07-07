@@ -17,44 +17,57 @@ const emit = defineEmits<{
 }>()
 
 const open = ref(false)
-const query = ref(props.modelValue)
+const searchQuery = ref('')
 
 watch(
   () => props.modelValue,
-  (value) => {
-    query.value = value
+  () => {
+    if (!open.value) searchQuery.value = ''
   },
 )
 
 const filtered = computed(() => {
-  const q = query.value.trim().toLowerCase()
+  const q = searchQuery.value.trim().toLowerCase()
+
+  if (!q) {
+    return props.options
+  }
+
   const list = props.options.filter((item) => item.toLowerCase().includes(q))
-  if (q && !props.options.some((item) => item.toLowerCase() === q)) {
-    return [`创建「${query.value.trim()}」`, ...list]
+  if (!props.options.some((item) => item.toLowerCase() === q)) {
+    return [`创建「${searchQuery.value.trim()}」`, ...list]
   }
   return list
 })
 
 function selectOption(option: string) {
   if (option.startsWith('创建「')) {
-    const value = query.value.trim()
+    const value = searchQuery.value.trim()
     if (value) emit('update:modelValue', value)
   } else {
     emit('update:modelValue', option)
-    query.value = option
   }
+  searchQuery.value = ''
   open.value = false
 }
 
 function onInput(event: Event) {
-  query.value = (event.target as HTMLInputElement).value
-  emit('update:modelValue', query.value)
+  searchQuery.value = (event.target as HTMLInputElement).value
+  emit('update:modelValue', searchQuery.value)
   open.value = true
+}
+
+function onFocus(event: FocusEvent) {
+  searchQuery.value = ''
+  open.value = true
+  const input = event.target as HTMLInputElement
+  window.requestAnimationFrame(() => input.select())
 }
 
 function onBlur() {
   window.setTimeout(() => {
     open.value = false
+    searchQuery.value = ''
   }, 120)
 }
 </script>
@@ -63,10 +76,10 @@ function onBlur() {
   <div class="relative">
     <input
       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
-      :value="modelValue"
+      :value="open ? searchQuery : modelValue"
       :placeholder="placeholder"
       @input="onInput"
-      @focus="open = true"
+      @focus="onFocus"
       @blur="onBlur"
     />
     <ul
