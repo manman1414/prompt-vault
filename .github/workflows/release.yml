@@ -1,4 +1,4 @@
-# Release desktop installer on version tag
+# Release desktop installers on version tag (Windows / macOS / Linux)
 # @author prompt-vault team
 # @date 2026-07-07
 
@@ -13,67 +13,108 @@ permissions:
   contents: write
 
 jobs:
-  release:
-    runs-on: windows-latest
-    timeout-minutes: 30
-
+  test:
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
         with:
           version: 11
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm
 
       - name: Use official Electron mirrors on CI
-        shell: pwsh
         run: |
-          if (Test-Path .npmrc) {
-            Get-Content .npmrc |
-              Where-Object { $_ -notmatch '^\s*electron(_builder_binaries)?_mirror\s*=' } |
-              Set-Content .npmrc.ci -Encoding utf8
-            Move-Item -Force .npmrc.ci .npmrc
-          }
-          Write-Host "CI .npmrc:"
-          Get-Content .npmrc -ErrorAction SilentlyContinue
+          if [ -f .npmrc ]; then
+            grep -v 'electron_mirror\|electron_builder_binaries_mirror' .npmrc > .npmrc.ci || true
+            mv .npmrc.ci .npmrc
+          fi
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Verify Electron installed
-        run: pnpm exec electron --version
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec electron --version
 
       - name: Verify tag matches package.json version
-        shell: pwsh
         run: |
-          $tag = "${{ github.ref_name }}" -replace '^v',''
-          $version = (Get-Content package.json | ConvertFrom-Json).version
-          if ($tag -ne $version) {
-            Write-Error "Tag v$tag does not match package.json version $version"
+          TAG="${GITHUB_REF_NAME#v}"
+          VERSION=$(node -p "require('./package.json').version")
+          if [ "$TAG" != "$VERSION" ]; then
+            echo "Tag v$TAG does not match package.json version $VERSION"
             exit 1
-          }
+          fi
 
-      - name: Run tests
-        run: pnpm test
+      - run: pnpm test
 
-      - name: Build Windows installer
-        run: pnpm electron:build
+  build:
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            build-script: electron:build:win
+            artifact: release/*.exe
+          - os: macos-latest
+            build-script: electron:build:mac
+            artifact: release/*.dmg
+          - os: ubuntu-latest
+            build-script: electron:build:linux
+            artifact: release/*.AppImage
+
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Use official Electron mirrors on CI
+        run: |
+          if [ -f .npmrc ]; then
+            grep -v 'electron_mirror\|electron_builder_binaries_mirror' .npmrc > .npmrc.ci || true
+            mv .npmrc.ci .npmrc
+          fi
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec electron --version
+      - run: pnpm run ${{ matrix.build-script }}
 
       - name: List release artifacts
-        shell: pwsh
-        run: Get-ChildItem release -Filter *.exe | Format-Table Name, Length -AutoSize
+        shell: bash
+        run: ls -lh release/ || true
 
-      - name: Upload to GitHub Release
-        uses: softprops/action-gh-release@v2
+      - uses: actions/upload-artifact@v4
         with:
-          files: release/*.exe
+          name: installer-${{ matrix.os }}
+          path: ${{ matrix.artifact }}
+          if-no-files-found: error
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: List downloaded artifacts
+        run: find artifacts -type f -exec ls -lh {} \;
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**
           fail_on_unmatched_files: true
           generate_release_notes: true
           draft: false

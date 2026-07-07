@@ -21,3 +21,7 @@ if (!fs.existsSync(source)) {
 const buffer = await pngToIco(source)
 fs.writeFileSync(target, buffer)
 console.log('[generate-icon] wrote', target, `(${buffer.length} bytes)`)
+
+const pngTarget = path.join(__dirname, '../build/icon.png')
+fs.copyFileSync(source, pngTarget)
+console.log('[generate-icon] wrote', pngTarget)

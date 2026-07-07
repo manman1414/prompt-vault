@@ -11,11 +11,14 @@ const path = require('path')
 const isDev = !app.isPackaged
 
 function getIconPath() {
+  const ext = process.platform === 'win32' ? 'ico' : 'png'
   const candidates = isDev
-    ? [path.join(__dirname, '../build/icon.ico')]
+    ? [path.join(__dirname, `../build/icon.${ext}`), path.join(__dirname, '../build/icon.png')]
     : [
-        path.join(process.resourcesPath, 'icon.ico'),
+        path.join(process.resourcesPath, `icon.${ext}`),
+        path.join(process.resourcesPath, 'icon.png'),
         path.join(__dirname, '../build/icon.ico'),
+        path.join(__dirname, '../build/icon.png'),
       ]
 
   return candidates.find((candidate) => fs.existsSync(candidate)) ?? null
@@ -32,11 +35,15 @@ function createWindow() {
     title: '提示词库',
     icon: iconPath || undefined,
     autoHideMenuBar: true,
+    show: false,
+    backgroundColor: '#f8fafc',
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
     },
   })
+
+  win.once('ready-to-show', () => win.show())
 
   if (isDev) {
     win.loadURL('http://localhost:5173')
