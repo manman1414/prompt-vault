@@ -3,12 +3,16 @@
   "private": true,
   "version": "0.1.0",
   "author": "prompt-vault team",
+  "description": "本地 AI 提示词管理工具",
+  "main": "electron/main.cjs",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "electron:dev": "concurrently -k \"vite\" \"wait-on http://localhost:5173 && electron .\"",
+    "electron:build": "pnpm build && electron-builder --win"
   },
   "dependencies": {
     "element-plus": "^2.9.0",
@@ -20,10 +24,38 @@
     "@types/node": "^22.10.0",
     "@vitejs/plugin-vue": "^5.2.1",
     "@vue/test-utils": "^2.4.6",
+    "concurrently": "^9.1.2",
+    "electron": "^34.0.0",
+    "electron-builder": "^25.1.8",
     "jsdom": "^25.0.1",
     "typescript": "~5.7.2",
     "vite": "^5.4.11",
     "vitest": "^2.1.8",
-    "vue-tsc": "^2.1.8"
+    "vue-tsc": "^2.1.8",
+    "wait-on": "^8.0.1"
+  },
+  "build": {
+    "appId": "com.prompt-vault.app",
+    "productName": "提示词库",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*"
+    ],
+    "icon": "build/icon.ico",
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico"
+    }
   }
 }

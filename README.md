@@ -34,3 +34,15 @@ pnpm test
 ```bash
 pnpm build
 ```
+
+## 桌面端（Electron）
+
+**localStorage 不用改代码**，API 完全一样。桌面版数据存在应用自己的目录里，和浏览器里的数据**不互通**。
+
+```bash
+pnpm install
+pnpm electron:dev      # 开发：打开桌面窗口
+pnpm electron:build    # 打包：release/ 目录生成 .exe 安装包
+```
+
+数据目录（Windows）：`%APPDATA%\提示词库\`

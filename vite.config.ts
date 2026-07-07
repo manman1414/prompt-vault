@@ -9,6 +9,8 @@ import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 
 export default defineConfig({
+  // 桌面端 file:// 加载需要相对路径
+  base: './',
   plugins: [vue()],
   resolve: {
     alias: {
