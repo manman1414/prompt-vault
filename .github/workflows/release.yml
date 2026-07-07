@@ -62,13 +62,13 @@ jobs:
         include:
           - os: windows-latest
             build-script: electron:build:win
-            artifact: release/*.exe
+            artifact: release/*-windows.exe
           - os: macos-latest
             build-script: electron:build:mac
-            artifact: release/*.dmg
+            artifact: release/*-macos.dmg
           - os: ubuntu-latest
             build-script: electron:build:linux
-            artifact: release/*.AppImage
+            artifact: release/*-linux.AppImage
 
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30

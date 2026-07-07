@@ -71,7 +71,7 @@ async function clearAll() {
 <template>
   <div>
     <h2 class="mb-2 text-xl font-semibold">设置</h2>
-    <p class="mb-5 text-sm text-slate-500">数据保存在浏览器 localStorage，可导出 JSON 备份。</p>
+    <p class="mb-5 text-sm text-slate-500">数据保存在本机，不会上传云端。建议定期导出 JSON 备份。</p>
 
     <div class="flex flex-wrap gap-3">
       <Button variant="primary" @click="exportJson">导出 JSON</Button>

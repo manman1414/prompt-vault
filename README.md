@@ -94,11 +94,11 @@ pnpm electron:build:linux   # Linux .AppImage
 2. 并行打包 **Windows / macOS / Linux** 安装包
 3. 上传到 [GitHub Releases](https://github.com/manman1414/prompt-vault/releases)
 
-| 平台 | 产物 |
-|------|------|
-| Windows | `prompt-vault-setup-x.y.z.exe` |
-| macOS | `prompt-vault-setup-x.y.z.dmg` |
-| Linux | `prompt-vault-setup-x.y.z.AppImage` |
+| 平台 | 安装包 |
+|------|--------|
+| Windows | `prompt-vault-setup-x.y.z-windows.exe` |
+| macOS（Apple Silicon） | `prompt-vault-setup-x.y.z-macos.dmg` |
+| Linux | `prompt-vault-setup-x.y.z-linux.AppImage` |
 
 ### 发布新版本
 

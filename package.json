@@ -1,7 +1,7 @@
 {
   "name": "prompt-vault",
   "private": true,
-  "version": "0.2.6",
+  "version": "0.2.7",
   "author": "prompt-vault team",
   "description": "Local AI prompt manager",
   "main": "electron/main.cjs",
@@ -75,6 +75,7 @@
       "icon": "build/icon.ico",
       "executableName": "prompt-vault",
       "signAndEditExecutable": false,
+      "artifactName": "prompt-vault-setup-${version}-windows.${ext}",
       "target": [
         "nsis"
       ]
@@ -92,6 +93,7 @@
     "mac": {
       "icon": "build/icon-512.png",
       "category": "public.app-category.productivity",
+      "artifactName": "prompt-vault-setup-${version}-macos.${ext}",
       "target": [
         "dmg"
       ]
@@ -99,6 +101,7 @@
     "linux": {
       "icon": "build/icon.png",
       "category": "Utility",
+      "artifactName": "prompt-vault-setup-${version}-linux.${ext}",
       "target": [
         "AppImage"
       ],
