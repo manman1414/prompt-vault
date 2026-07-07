@@ -32,6 +32,6 @@ const list = computed(() => store.filteredPrompts(selectedCategory.value, keywor
     <div v-if="list.length" class="flex flex-col gap-3">
       <PromptCard v-for="item in list" :key="item.id" :prompt="item" />
     </div>
-    <Empty v-else description="暂无 Prompt，点击顶部「新建」添加" />
+    <Empty v-else description="暂无提示词，点击顶部「新建」添加" />
   </div>
 </template>

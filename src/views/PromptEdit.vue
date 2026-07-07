@@ -22,7 +22,7 @@ const toast = useToast()
 const { categories } = storeToRefs(store)
 
 const isEdit = computed(() => route.name === 'edit')
-const pageTitle = computed(() => (isEdit.value ? '编辑 Prompt' : '新建 Prompt'))
+const pageTitle = computed(() => (isEdit.value ? '编辑提示词' : '新建提示词'))
 
 const form = reactive({
   title: '',
@@ -48,7 +48,7 @@ onMounted(() => {
   const id = route.params.id as string
   const prompt = store.getById(id)
   if (!prompt) {
-    toast.error('Prompt 不存在')
+    toast.error('提示词不存在')
     router.replace('/')
     return
   }
@@ -109,7 +109,7 @@ function handleCancel() {
 
       <label class="block">
         <span class="mb-1.5 block text-sm text-slate-600">内容 <span class="text-red-500">*</span></span>
-        <Textarea v-model="form.content" :rows="10" placeholder="输入完整 Prompt 内容" />
+        <Textarea v-model="form.content" :rows="10" placeholder="输入完整提示词内容" />
       </label>
 
       <label class="block">

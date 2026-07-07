@@ -57,7 +57,7 @@ async function clearAll() {
   try {
     await confirm({
       title: '警告',
-      message: '确定清空全部 Prompt？此操作不可恢复。',
+      message: '确定清空全部提示词？此操作不可恢复。',
       variant: 'danger',
     })
     store.clearAll()

@@ -1,7 +1,7 @@
 {
   "name": "prompt-vault",
   "private": true,
-  "version": "0.2.7",
+  "version": "0.3.0",
   "author": "prompt-vault team",
   "description": "Local AI prompt manager",
   "main": "electron/main.cjs",
@@ -12,10 +12,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "electron:dev": "concurrently -k \"vite\" \"wait-on http://localhost:5173 && electron .\"",
-    "electron:build": "pnpm electron:build:win",
-    "electron:build:win": "node scripts/generate-icon.mjs && pnpm build && electron-builder --win --dir --publish never && node scripts/patch-exe-icon.mjs && electron-builder --prepackaged release/win-unpacked --win nsis --publish never",
-    "electron:build:mac": "node scripts/generate-icon.mjs && pnpm build && electron-builder --mac dmg --publish never",
-    "electron:build:linux": "node scripts/generate-icon.mjs && pnpm build && electron-builder --linux AppImage --publish never",
+    "electron:build": "node scripts/generate-icon.mjs && pnpm build && electron-builder --win --dir --publish never && node scripts/patch-exe-icon.mjs && electron-builder --prepackaged release/win-unpacked --win nsis --publish never",
     "release": "node scripts/release.mjs",
     "release:verify": "node scripts/verify-release.mjs"
   },
@@ -89,23 +86,6 @@
       "createDesktopShortcut": false,
       "createStartMenuShortcut": false,
       "include": "build/installer.nsh"
-    },
-    "mac": {
-      "icon": "build/icon-512.png",
-      "category": "public.app-category.productivity",
-      "artifactName": "prompt-vault-setup-${version}-macos.${ext}",
-      "target": [
-        "dmg"
-      ]
-    },
-    "linux": {
-      "icon": "build/icon.png",
-      "category": "Utility",
-      "artifactName": "prompt-vault-setup-${version}-linux.${ext}",
-      "target": [
-        "AppImage"
-      ],
-      "executableName": "prompt-vault"
     }
   }
 }
