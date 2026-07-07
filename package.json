@@ -47,6 +47,8 @@
     "icon": "build/icon.ico",
     "win": {
       "icon": "build/icon.ico",
+      "executableName": "prompt-vault",
+      "signAndEditExecutable": false,
       "target": [
         "nsis"
       ]
@@ -55,7 +57,8 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "installerIcon": "build/icon.ico",
-      "uninstallerIcon": "build/icon.ico"
+      "uninstallerIcon": "build/icon.ico",
+      "shortcutName": "提示词库"
     }
   }
 }
