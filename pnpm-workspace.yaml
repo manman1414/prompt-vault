@@ -1,4 +1,16 @@
+# pnpm 11+ requires allowBuilds for dependency install scripts on CI
+# @author prompt-vault team
+# @date 2026-07-07
+
+packages:
+  - .
+
 allowBuilds:
+  electron: true
   esbuild: true
   vue-demi: true
-  electron: true
+
+onlyBuiltDependencies:
+  - electron
+  - esbuild
+  - vue-demi

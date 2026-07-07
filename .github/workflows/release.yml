@@ -32,7 +32,17 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify Electron binary
+        shell: pwsh
+        run: |
+          $electronExe = Get-ChildItem -Path node_modules/electron/dist -Filter electron.exe -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $electronExe) {
+            Write-Error "Electron binary missing. pnpm may have blocked install scripts (allowBuilds)."
+            exit 1
+          }
+          Write-Host "Electron OK:" $electronExe.FullName
 
       - name: Verify tag matches package.json version
         shell: pwsh
@@ -49,6 +59,10 @@ jobs:
 
       - name: Build Windows installer
         run: pnpm electron:build
+
+      - name: List release artifacts
+        shell: pwsh
+        run: Get-ChildItem release -Filter *.exe | Format-Table Name, Length -AutoSize
 
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
