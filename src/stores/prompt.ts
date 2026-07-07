@@ -5,6 +5,7 @@
  */
 
 import type { AppState, Prompt } from '@/types'
+import { DEFAULT_CATEGORIES } from '@/types'
 import { defaultState, loadState, saveState } from '@/utils/storage'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
@@ -20,6 +21,17 @@ function createId(): string {
   return crypto.randomUUID()
 }
 
+/** Keep stored order, append missing defaults at the end */
+function normalizeCategories(list: string[]): string[] {
+  const result = [...list]
+  for (const category of DEFAULT_CATEGORIES) {
+    if (!result.includes(category)) {
+      result.push(category)
+    }
+  }
+  return result
+}
+
 export const usePromptStore = defineStore('prompt', () => {
   const prompts = ref<Prompt[]>([])
   const categories = ref<string[]>([])
@@ -27,7 +39,7 @@ export const usePromptStore = defineStore('prompt', () => {
   function hydrate() {
     const state = loadState()
     prompts.value = state.prompts
-    categories.value = state.categories
+    categories.value = normalizeCategories(state.categories)
   }
 
   function persist() {
@@ -109,7 +121,9 @@ export const usePromptStore = defineStore('prompt', () => {
 
   function importState(state: AppState) {
     prompts.value = state.prompts ?? []
-    categories.value = state.categories?.length ? state.categories : defaultState().categories
+    categories.value = normalizeCategories(
+      state.categories?.length ? state.categories : defaultState().categories,
+    )
     persist()
   }
 

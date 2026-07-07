@@ -10,9 +10,8 @@ import Input from '@/components/ui/Input.vue'
 import Textarea from '@/components/ui/Textarea.vue'
 import { useToast } from '@/composables/useToast'
 import { usePromptStore } from '@/stores/prompt'
-import { DEFAULT_CATEGORIES } from '@/types'
 import { storeToRefs } from 'pinia'
-import { computed, onMounted, reactive } from 'vue'
+import { computed, reactive, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
@@ -27,24 +26,15 @@ const pageTitle = computed(() => (isEdit.value ? '编辑提示词' : '新建提�
 const form = reactive({
   title: '',
   content: '',
-  category: '写作',
+  category: categories.value[0] ?? '其他',
   tagsText: '',
 })
 
-const categoryOptions = computed(() => {
-  const merged = new Set([...DEFAULT_CATEGORIES, ...categories.value, form.category].filter(Boolean))
-  return Array.from(merged)
-})
-
-function parseTags(text: string) {
-  return text
-    .split(/[,，]/)
-    .map((tag) => tag.trim())
-    .filter(Boolean)
+function defaultCategory() {
+  return categories.value[0] ?? '其他'
 }
 
-onMounted(() => {
-  if (!isEdit.value) return
+function loadEditForm() {
   const id = route.params.id as string
   const prompt = store.getById(id)
   if (!prompt) {
@@ -56,7 +46,41 @@ onMounted(() => {
   form.content = prompt.content
   form.category = prompt.category
   form.tagsText = prompt.tags.join(', ')
+}
+
+function resetNewForm() {
+  form.title = ''
+  form.content = ''
+  form.category = defaultCategory()
+  form.tagsText = ''
+}
+
+const categoryOptions = computed(() => {
+  const list = [...categories.value]
+  if (form.category && !list.includes(form.category)) {
+    list.push(form.category)
+  }
+  return list
 })
+
+function parseTags(text: string) {
+  return text
+    .split(/[,，]/)
+    .map((tag) => tag.trim())
+    .filter(Boolean)
+}
+
+watch(
+  () => route.fullPath,
+  () => {
+    if (isEdit.value) {
+      loadEditForm()
+    } else {
+      resetNewForm()
+    }
+  },
+  { immediate: true },
+)
 
 function handleSubmit() {
   if (!form.title.trim() || !form.content.trim()) {
@@ -73,7 +97,7 @@ function handleSubmit() {
   const payload = {
     title: form.title,
     content: form.content,
-    category: form.category || '其他',
+    category: form.category || defaultCategory(),
     tags: parseTags(form.tagsText),
   }
 

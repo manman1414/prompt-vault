@@ -45,4 +45,17 @@ describe('prompt store', () => {
     const prompt = store.addPrompt({ title: 'Same', content: 'A', category: '写作', tags: [] })
     expect(store.isTitleTaken('Same', prompt.id)).toBe(false)
   })
+
+  it('keeps category array order and appends missing defaults', () => {
+    localStorage.setItem(
+      'prompt-vault-data',
+      JSON.stringify({ prompts: [], categories: ['自定义', '写作'] }),
+    )
+    setActivePinia(createPinia())
+    const store = usePromptStore()
+    store.hydrate()
+    expect(store.categories.slice(0, 2)).toEqual(['自定义', '写作'])
+    expect(store.categories).toContain('编程')
+    expect(store.categories.indexOf('自定义')).toBeLessThan(store.categories.indexOf('编程'))
+  })
 })
