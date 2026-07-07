@@ -15,6 +15,7 @@ permissions:
 jobs:
   release:
     runs-on: windows-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
@@ -31,18 +32,23 @@ jobs:
           node-version: 22
           cache: pnpm
 
+      - name: Use official Electron mirrors on CI
+        shell: pwsh
+        run: |
+          if (Test-Path .npmrc) {
+            Get-Content .npmrc |
+              Where-Object { $_ -notmatch '^\s*electron(_builder_binaries)?_mirror\s*=' } |
+              Set-Content .npmrc.ci -Encoding utf8
+            Move-Item -Force .npmrc.ci .npmrc
+          }
+          Write-Host "CI .npmrc:"
+          Get-Content .npmrc -ErrorAction SilentlyContinue
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Verify Electron binary
-        shell: pwsh
-        run: |
-          $electronExe = Get-ChildItem -Path node_modules/electron/dist -Filter electron.exe -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
-          if (-not $electronExe) {
-            Write-Error "Electron binary missing. pnpm may have blocked install scripts (allowBuilds)."
-            exit 1
-          }
-          Write-Host "Electron OK:" $electronExe.FullName
+      - name: Verify Electron installed
+        run: pnpm exec electron --version
 
       - name: Verify tag matches package.json version
         shell: pwsh
@@ -68,6 +74,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: release/*.exe
+          fail_on_unmatched_files: true
           generate_release_notes: true
           draft: false
           prerelease: false

@@ -1,7 +1,7 @@
 {
   "name": "prompt-vault",
   "private": true,
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": "prompt-vault team",
   "description": "Local AI prompt manager",
   "main": "electron/main.cjs",
@@ -40,6 +40,7 @@
   "build": {
     "appId": "com.prompt-vault.app",
     "productName": "提示词库",
+    "artifactName": "prompt-vault-setup-${version}.${ext}",
     "directories": {
       "output": "release"
     },

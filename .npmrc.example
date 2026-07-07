@@ -1,0 +1,10 @@
+# 国内网络加速（复制为 .npmrc 使用）
+# @author prompt-vault team
+# @date 2026-07-07
+#
+#   copy .npmrc.example .npmrc
+#
+# GitHub Actions 不使用此文件，CI 走官方 Electron 下载源。
+
+electron_mirror=https://npmmirror.com/mirrors/electron/
+electron_builder_binaries_mirror=https://npmmirror.com/mirrors/electron-builder-binaries/
