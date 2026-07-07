@@ -71,8 +71,18 @@ function main() {
   pkg.version = nextVersion
   writePackage(pkg)
 
+  run(`node scripts/verify-release.mjs ${tag}`)
+
   run('git add package.json')
   run(`git commit -m "chore: release ${tag}"`)
+
+  const committed = readPackage().version
+  if (committed !== nextVersion) {
+    console.error(`Version mismatch after commit: expected ${nextVersion}, got ${committed}`)
+    process.exit(1)
+  }
+
+  run(`node scripts/verify-release.mjs ${tag}`)
   run(`git tag ${tag}`)
 
   console.log('')

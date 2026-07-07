@@ -1,7 +1,7 @@
 {
   "name": "prompt-vault",
   "private": true,
-  "version": "0.2.2",
+  "version": "0.2.4",
   "author": "prompt-vault team",
   "description": "Local AI prompt manager",
   "main": "electron/main.cjs",
@@ -16,7 +16,8 @@
     "electron:build:win": "node scripts/generate-icon.mjs && pnpm build && electron-builder --win --dir --publish never && node scripts/patch-exe-icon.mjs && electron-builder --prepackaged release/win-unpacked --win nsis --publish never",
     "electron:build:mac": "node scripts/generate-icon.mjs && pnpm build && electron-builder --mac dmg --publish never",
     "electron:build:linux": "node scripts/generate-icon.mjs && pnpm build && electron-builder --linux AppImage --publish never",
-    "release": "node scripts/release.mjs"
+    "release": "node scripts/release.mjs",
+    "release:verify": "node scripts/verify-release.mjs"
   },
   "dependencies": {
     "pinia": "^2.3.0",
