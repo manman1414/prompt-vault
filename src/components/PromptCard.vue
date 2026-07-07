@@ -4,11 +4,14 @@
   @date 2026-07-07
 -->
 <script setup lang="ts">
+import Button from '@/components/ui/Button.vue'
+import Tag from '@/components/ui/Tag.vue'
+import { confirm } from '@/composables/useConfirm'
+import { useToast } from '@/composables/useToast'
+import { usePromptStore } from '@/stores/prompt'
 import type { Prompt } from '@/types'
-import { ElButton, ElMessage, ElMessageBox, ElTag } from 'element-plus'
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { usePromptStore } from '@/stores/prompt'
 
 const props = defineProps<{
   prompt: Prompt
@@ -16,6 +19,7 @@ const props = defineProps<{
 
 const router = useRouter()
 const store = usePromptStore()
+const toast = useToast()
 
 const summary = computed(() => {
   const text = props.prompt.content.replace(/\s+/g, ' ').trim()
@@ -27,9 +31,9 @@ const updatedLabel = computed(() => new Date(props.prompt.updatedAt).toLocaleStr
 async function copyContent() {
   try {
     await navigator.clipboard.writeText(props.prompt.content)
-    ElMessage.success('已复制到剪贴板')
+    toast.success('已复制到剪贴板')
   } catch {
-    ElMessage.warning('复制失败，请手动复制')
+    toast.warning('复制失败，请手动复制')
   }
 }
 
@@ -39,9 +43,9 @@ function editPrompt() {
 
 async function deletePrompt() {
   try {
-    await ElMessageBox.confirm(`确定删除「${props.prompt.title}」？`, '提示', { type: 'warning' })
+    await confirm({ message: `确定删除「${props.prompt.title}」？`, variant: 'danger' })
     store.removePrompt(props.prompt.id)
-    ElMessage.success('已删除')
+    toast.success('已删除')
   } catch {
     /* cancelled */
   }
@@ -49,74 +53,22 @@ async function deletePrompt() {
 </script>
 
 <template>
-  <article class="prompt-card">
-    <div class="prompt-card__header">
-      <h3>{{ prompt.title }}</h3>
-      <ElTag size="small">{{ prompt.category }}</ElTag>
+  <article class="rounded-xl border border-slate-200 bg-white p-4">
+    <div class="flex items-center justify-between gap-3">
+      <h3 class="text-base font-semibold">{{ prompt.title }}</h3>
+      <Tag>{{ prompt.category }}</Tag>
     </div>
-    <p class="prompt-card__summary">{{ summary }}</p>
-    <div v-if="prompt.tags.length" class="prompt-card__tags">
-      <ElTag v-for="tag in prompt.tags" :key="tag" size="small" type="info">{{ tag }}</ElTag>
+    <p class="my-3 whitespace-pre-wrap text-sm leading-6 text-slate-600">{{ summary }}</p>
+    <div v-if="prompt.tags.length" class="mb-3 flex flex-wrap gap-1.5">
+      <Tag v-for="tag in prompt.tags" :key="tag" variant="info">{{ tag }}</Tag>
     </div>
-    <div class="prompt-card__footer">
-      <span class="prompt-card__time">{{ updatedLabel }}</span>
-      <div class="prompt-card__actions">
-        <ElButton size="small" type="primary" @click="copyContent">复制</ElButton>
-        <ElButton size="small" @click="editPrompt">编辑</ElButton>
-        <ElButton size="small" type="danger" text @click="deletePrompt">删除</ElButton>
+    <div class="flex items-center justify-between gap-3">
+      <span class="text-xs text-slate-400">{{ updatedLabel }}</span>
+      <div class="flex gap-1">
+        <Button size="sm" variant="primary" @click="copyContent">复制</Button>
+        <Button size="sm" @click="editPrompt">编辑</Button>
+        <Button size="sm" variant="ghost" @click="deletePrompt">删除</Button>
       </div>
     </div>
   </article>
 </template>
-
-<style scoped>
-.prompt-card {
-  background: #fff;
-  border: 1px solid #e4e7ed;
-  border-radius: 10px;
-  padding: 16px;
-}
-
-.prompt-card__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.prompt-card__header h3 {
-  margin: 0;
-  font-size: 16px;
-}
-
-.prompt-card__summary {
-  margin: 12px 0;
-  color: #606266;
-  line-height: 1.6;
-  white-space: pre-wrap;
-}
-
-.prompt-card__tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 12px;
-}
-
-.prompt-card__footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.prompt-card__time {
-  font-size: 12px;
-  color: #909399;
-}
-
-.prompt-card__actions {
-  display: flex;
-  gap: 4px;
-}
-</style>

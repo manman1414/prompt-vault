@@ -4,12 +4,15 @@
   @date 2026-07-07
 -->
 <script setup lang="ts">
+import Button from '@/components/ui/Button.vue'
+import { confirm } from '@/composables/useConfirm'
+import { useToast } from '@/composables/useToast'
 import type { AppState } from '@/types'
 import { usePromptStore } from '@/stores/prompt'
-import { ElButton, ElMessage, ElMessageBox } from 'element-plus'
 import { ref } from 'vue'
 
 const store = usePromptStore()
+const toast = useToast()
 const fileInput = ref<HTMLInputElement | null>(null)
 
 function exportJson() {
@@ -21,7 +24,7 @@ function exportJson() {
   link.download = `prompt-vault-backup-${Date.now()}.json`
   link.click()
   URL.revokeObjectURL(url)
-  ElMessage.success('导出成功')
+  toast.success('导出成功')
 }
 
 function openImport() {
@@ -39,11 +42,12 @@ async function handleImport(event: Event) {
     if (!Array.isArray(data.prompts)) {
       throw new Error('invalid format')
     }
-    await ElMessageBox.confirm('导入将覆盖当前全部数据，是否继续？', '提示', { type: 'warning' })
+    await confirm({ message: '导入将覆盖当前全部数据，是否继续？', variant: 'danger' })
     store.importState(data)
-    ElMessage.success('导入成功')
-  } catch {
-    ElMessage.error('导入失败，请检查 JSON 格式')
+    toast.success('导入成功')
+  } catch (error) {
+    if (error instanceof Error && error.message === 'cancelled') return
+    toast.error('导入失败，请检查 JSON 格式')
   } finally {
     input.value = ''
   }
@@ -51,9 +55,13 @@ async function handleImport(event: Event) {
 
 async function clearAll() {
   try {
-    await ElMessageBox.confirm('确定清空全部 Prompt？此操作不可恢复。', '警告', { type: 'warning' })
+    await confirm({
+      title: '警告',
+      message: '确定清空全部 Prompt？此操作不可恢复。',
+      variant: 'danger',
+    })
     store.clearAll()
-    ElMessage.success('已清空')
+    toast.success('已清空')
   } catch {
     /* cancelled */
   }
@@ -61,32 +69,15 @@ async function clearAll() {
 </script>
 
 <template>
-  <div class="settings">
-    <h2>设置</h2>
-    <p class="settings__desc">数据保存在浏览器 localStorage，可导出 JSON 备份。</p>
+  <div>
+    <h2 class="mb-2 text-xl font-semibold">设置</h2>
+    <p class="mb-5 text-sm text-slate-500">数据保存在浏览器 localStorage，可导出 JSON 备份。</p>
 
-    <div class="settings__actions">
-      <ElButton type="primary" @click="exportJson">导出 JSON</ElButton>
-      <ElButton @click="openImport">导入 JSON</ElButton>
-      <ElButton type="danger" plain @click="clearAll">清空数据</ElButton>
+    <div class="flex flex-wrap gap-3">
+      <Button variant="primary" @click="exportJson">导出 JSON</Button>
+      <Button @click="openImport">导入 JSON</Button>
+      <Button variant="danger" @click="clearAll">清空数据</Button>
       <input ref="fileInput" type="file" accept="application/json,.json" hidden @change="handleImport" />
     </div>
   </div>
 </template>
-
-<style scoped>
-.settings h2 {
-  margin: 0 0 8px;
-}
-
-.settings__desc {
-  margin: 0 0 20px;
-  color: #606266;
-}
-
-.settings__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-</style>

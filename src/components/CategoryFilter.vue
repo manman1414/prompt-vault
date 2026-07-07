@@ -15,11 +15,15 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="category-filter">
+  <div class="flex flex-wrap gap-2">
     <button
       type="button"
-      class="category-filter__item"
-      :class="{ 'is-active': modelValue === '' }"
+      class="rounded-full border px-3 py-1 text-xs transition"
+      :class="
+        modelValue === ''
+          ? 'border-brand bg-brand-light text-brand'
+          : 'border-slate-300 bg-white text-slate-600 hover:border-slate-400'
+      "
       @click="emit('update:modelValue', '')"
     >
       全部
@@ -28,34 +32,15 @@ const emit = defineEmits<{
       v-for="category in categories"
       :key="category"
       type="button"
-      class="category-filter__item"
-      :class="{ 'is-active': modelValue === category }"
+      class="rounded-full border px-3 py-1 text-xs transition"
+      :class="
+        modelValue === category
+          ? 'border-brand bg-brand-light text-brand'
+          : 'border-slate-300 bg-white text-slate-600 hover:border-slate-400'
+      "
       @click="emit('update:modelValue', category)"
     >
       {{ category }}
     </button>
   </div>
 </template>
-
-<style scoped>
-.category-filter {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.category-filter__item {
-  border: 1px solid #dcdfe6;
-  background: #fff;
-  border-radius: 16px;
-  padding: 4px 12px;
-  cursor: pointer;
-  font-size: 13px;
-}
-
-.category-filter__item.is-active {
-  border-color: #409eff;
-  color: #409eff;
-  background: #ecf5ff;
-}
-</style>
