@@ -10,7 +10,12 @@ defineProps<{
 </script>
 
 <template>
-  <div class="rounded-xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
-    <p class="text-sm text-slate-500">{{ description }}</p>
+  <div class="surface-card px-6 py-14 text-center">
+    <div
+      class="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-slate-100 text-xl text-slate-400"
+    >
+      ✦
+    </div>
+    <p class="text-sm leading-6 text-slate-500">{{ description }}</p>
   </div>
 </template>

@@ -5,7 +5,6 @@
  */
 
 import type { AppState, Prompt } from '@/types'
-import { DEFAULT_CATEGORIES } from '@/types'
 import { defaultState, loadState, saveState } from '@/utils/storage'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
@@ -21,15 +20,8 @@ function createId(): string {
   return crypto.randomUUID()
 }
 
-/** Keep stored order, append missing defaults at the end */
-function normalizeCategories(list: string[]): string[] {
-  const result = [...list]
-  for (const category of DEFAULT_CATEGORIES) {
-    if (!result.includes(category)) {
-      result.push(category)
-    }
-  }
-  return result
+function normalizeCategoryName(name: string) {
+  return name.trim()
 }
 
 export const usePromptStore = defineStore('prompt', () => {
@@ -39,7 +31,7 @@ export const usePromptStore = defineStore('prompt', () => {
   function hydrate() {
     const state = loadState()
     prompts.value = state.prompts
-    categories.value = normalizeCategories(state.categories)
+    categories.value = [...state.categories]
   }
 
   function persist() {
@@ -47,7 +39,7 @@ export const usePromptStore = defineStore('prompt', () => {
   }
 
   function ensureCategory(category: string) {
-    const trimmed = category.trim()
+    const trimmed = normalizeCategoryName(category)
     if (!trimmed) return
     if (!categories.value.includes(trimmed)) {
       categories.value.push(trimmed)
@@ -93,6 +85,13 @@ export const usePromptStore = defineStore('prompt', () => {
     persist()
   }
 
+  function removePrompts(ids: string[]) {
+    if (!ids.length) return
+    const idSet = new Set(ids)
+    prompts.value = prompts.value.filter((item) => !idSet.has(item.id))
+    persist()
+  }
+
   function getById(id: string) {
     return prompts.value.find((item) => item.id === id) ?? null
   }
@@ -103,6 +102,52 @@ export const usePromptStore = defineStore('prompt', () => {
     return prompts.value.some(
       (item) => item.id !== excludeId && item.title.trim() === normalized,
     )
+  }
+
+  function categoryPromptCount(name: string) {
+    return prompts.value.filter((item) => item.category === name).length
+  }
+
+  function addCategory(name: string): { ok: true } | { ok: false; reason: 'empty' | 'duplicate' } {
+    const trimmed = normalizeCategoryName(name)
+    if (!trimmed) return { ok: false, reason: 'empty' }
+    if (categories.value.includes(trimmed)) return { ok: false, reason: 'duplicate' }
+    categories.value.push(trimmed)
+    persist()
+    return { ok: true }
+  }
+
+  function renameCategory(
+    oldName: string,
+    newName: string,
+  ): { ok: true } | { ok: false; reason: 'empty' | 'duplicate' | 'not_found' } {
+    const trimmed = normalizeCategoryName(newName)
+    if (!trimmed) return { ok: false, reason: 'empty' }
+    const index = categories.value.indexOf(oldName)
+    if (index === -1) return { ok: false, reason: 'not_found' }
+    if (trimmed !== oldName && categories.value.includes(trimmed)) {
+      return { ok: false, reason: 'duplicate' }
+    }
+    categories.value[index] = trimmed
+    for (const prompt of prompts.value) {
+      if (prompt.category === oldName) {
+        prompt.category = trimmed
+      }
+    }
+    persist()
+    return { ok: true }
+  }
+
+  function removeCategory(
+    name: string,
+  ): { ok: true } | { ok: false; reason: 'not_found' | 'has_prompts'; count?: number } {
+    const index = categories.value.indexOf(name)
+    if (index === -1) return { ok: false, reason: 'not_found' }
+    const count = categoryPromptCount(name)
+    if (count > 0) return { ok: false, reason: 'has_prompts', count }
+    categories.value.splice(index, 1)
+    persist()
+    return { ok: true }
   }
 
   function filteredPrompts(category: string, keyword: string) {
@@ -121,9 +166,7 @@ export const usePromptStore = defineStore('prompt', () => {
 
   function importState(state: AppState) {
     prompts.value = state.prompts ?? []
-    categories.value = normalizeCategories(
-      state.categories?.length ? state.categories : defaultState().categories,
-    )
+    categories.value = state.categories?.length ? [...state.categories] : defaultState().categories
     persist()
   }
 
@@ -141,8 +184,13 @@ export const usePromptStore = defineStore('prompt', () => {
     addPrompt,
     updatePrompt,
     removePrompt,
+    removePrompts,
     getById,
     isTitleTaken,
+    categoryPromptCount,
+    addCategory,
+    renameCategory,
+    removeCategory,
     filteredPrompts,
     exportState,
     importState,

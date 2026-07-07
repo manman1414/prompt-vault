@@ -23,13 +23,17 @@ withDefaults(
 <template>
   <button
     :type="type"
-    class="inline-flex items-center justify-center rounded-lg border font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+    class="inline-flex items-center justify-center rounded-xl border font-medium transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100"
     :class="[
-      size === 'sm' ? 'px-2.5 py-1 text-xs' : 'px-4 py-2 text-sm',
-      variant === 'primary' && 'border-brand bg-brand text-white hover:bg-brand-dark',
-      variant === 'default' && 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50',
-      variant === 'danger' && 'border-red-300 bg-white text-red-600 hover:bg-red-50',
-      variant === 'ghost' && 'border-transparent bg-transparent text-red-600 hover:bg-red-50',
+      size === 'sm' ? 'px-3 py-1.5 text-xs' : 'px-4 py-2.5 text-sm',
+      variant === 'primary' &&
+        'border-transparent bg-gradient-to-b from-brand to-brand-dark text-white shadow-sm hover:brightness-105',
+      variant === 'default' &&
+        'border-slate-200/80 bg-white text-slate-700 shadow-sm hover:border-slate-300 hover:bg-slate-50',
+      variant === 'danger' &&
+        'border-red-200 bg-white text-red-600 shadow-sm hover:border-red-300 hover:bg-red-50',
+      variant === 'ghost' &&
+        'border-transparent bg-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-700',
     ]"
     :disabled="disabled"
   >

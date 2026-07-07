@@ -1,5 +1,5 @@
 <!--
-  Prompt edit page
+  Prompt edit page (create only)
   @author prompt-vault team
   @date 2026-07-07
 -->
@@ -11,17 +11,13 @@ import Textarea from '@/components/ui/Textarea.vue'
 import { useToast } from '@/composables/useToast'
 import { usePromptStore } from '@/stores/prompt'
 import { storeToRefs } from 'pinia'
-import { computed, reactive, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { computed, reactive } from 'vue'
+import { useRouter } from 'vue-router'
 
-const route = useRoute()
 const router = useRouter()
 const store = usePromptStore()
 const toast = useToast()
 const { categories } = storeToRefs(store)
-
-const isEdit = computed(() => route.name === 'edit')
-const pageTitle = computed(() => (isEdit.value ? '编辑提示词' : '新建提示词'))
 
 const form = reactive({
   title: '',
@@ -34,34 +30,7 @@ function defaultCategory() {
   return categories.value[0] ?? '其他'
 }
 
-function loadEditForm() {
-  const id = route.params.id as string
-  const prompt = store.getById(id)
-  if (!prompt) {
-    toast.error('提示词不存在')
-    router.replace('/')
-    return
-  }
-  form.title = prompt.title
-  form.content = prompt.content
-  form.category = prompt.category
-  form.tagsText = prompt.tags.join(', ')
-}
-
-function resetNewForm() {
-  form.title = ''
-  form.content = ''
-  form.category = defaultCategory()
-  form.tagsText = ''
-}
-
-const categoryOptions = computed(() => {
-  const list = [...categories.value]
-  if (form.category && !list.includes(form.category)) {
-    list.push(form.category)
-  }
-  return list
-})
+const categoryOptions = computed(() => [...categories.value])
 
 function parseTags(text: string) {
   return text
@@ -70,49 +39,24 @@ function parseTags(text: string) {
     .filter(Boolean)
 }
 
-watch(
-  () => route.fullPath,
-  () => {
-    if (isEdit.value) {
-      loadEditForm()
-    } else {
-      resetNewForm()
-    }
-  },
-  { immediate: true },
-)
-
 function handleSubmit() {
   if (!form.title.trim() || !form.content.trim()) {
     toast.warning('请填写标题和内容')
     return
   }
 
-  const excludeId = isEdit.value ? (route.params.id as string) : undefined
-  if (store.isTitleTaken(form.title, excludeId)) {
+  if (store.isTitleTaken(form.title)) {
     toast.warning('标题已存在，请使用其他名称')
     return
   }
 
-  const payload = {
+  store.addPrompt({
     title: form.title,
     content: form.content,
     category: form.category || defaultCategory(),
     tags: parseTags(form.tagsText),
-  }
-
-  if (isEdit.value) {
-    const ok = store.updatePrompt(route.params.id as string, payload)
-    if (!ok) {
-      toast.error('保存失败')
-      return
-    }
-    toast.success('已更新')
-  } else {
-    store.addPrompt(payload)
-    toast.success('已创建')
-  }
-
+  })
+  toast.success('已创建')
   router.push('/')
 }
 
@@ -123,30 +67,30 @@ function handleCancel() {
 
 <template>
   <div>
-    <h2 class="mb-5 text-xl font-semibold">{{ pageTitle }}</h2>
+    <h2 class="page-title mb-6">新建提示词</h2>
 
-    <form class="space-y-4" @submit.prevent="handleSubmit">
+    <form class="surface-card space-y-4 p-5" @submit.prevent="handleSubmit">
       <label class="block">
-        <span class="mb-1.5 block text-sm text-slate-600">标题 <span class="text-red-500">*</span></span>
+        <span class="field-label">标题 <span class="text-red-500">*</span></span>
         <Input v-model="form.title" placeholder="例如：代码审查助手" />
       </label>
 
       <label class="block">
-        <span class="mb-1.5 block text-sm text-slate-600">内容 <span class="text-red-500">*</span></span>
+        <span class="field-label">内容 <span class="text-red-500">*</span></span>
         <Textarea v-model="form.content" :rows="10" placeholder="输入完整提示词内容" />
       </label>
 
       <label class="block">
-        <span class="mb-1.5 block text-sm text-slate-600">分类</span>
-        <Combobox v-model="form.category" :options="categoryOptions" placeholder="选择或输入分类" />
+        <span class="field-label">分类</span>
+        <Combobox v-model="form.category" :options="categoryOptions" placeholder="选择分类" />
       </label>
 
       <label class="block">
-        <span class="mb-1.5 block text-sm text-slate-600">标签</span>
+        <span class="field-label">标签</span>
         <Input v-model="form.tagsText" placeholder="多个标签用逗号分隔" />
       </label>
 
-      <div class="flex gap-3 pt-2">
+      <div class="flex gap-3 border-t border-slate-100 pt-4">
         <Button type="submit" variant="primary">保存</Button>
         <Button type="button" @click="handleCancel">取消</Button>
       </div>

@@ -46,7 +46,7 @@ describe('prompt store', () => {
     expect(store.isTitleTaken('Same', prompt.id)).toBe(false)
   })
 
-  it('keeps category array order and appends missing defaults', () => {
+  it('keeps stored category order on hydrate', () => {
     localStorage.setItem(
       'prompt-vault-data',
       JSON.stringify({ prompts: [], categories: ['自定义', '写作'] }),
@@ -54,8 +54,32 @@ describe('prompt store', () => {
     setActivePinia(createPinia())
     const store = usePromptStore()
     store.hydrate()
-    expect(store.categories.slice(0, 2)).toEqual(['自定义', '写作'])
-    expect(store.categories).toContain('编程')
-    expect(store.categories.indexOf('自定义')).toBeLessThan(store.categories.indexOf('编程'))
+    expect(store.categories).toEqual(['自定义', '写作'])
+  })
+
+  it('manages categories', () => {
+    const store = usePromptStore()
+    store.hydrate()
+
+    expect(store.addCategory('自定义')).toEqual({ ok: true })
+    expect(store.addCategory('自定义')).toEqual({ ok: false, reason: 'duplicate' })
+
+    store.addPrompt({ title: 'A', content: 'x', category: '自定义', tags: [] })
+    expect(store.categoryPromptCount('自定义')).toBe(1)
+
+    expect(store.renameCategory('自定义', '新分类')).toEqual({ ok: true })
+    expect(store.prompts[0]?.category).toBe('新分类')
+
+    expect(store.removeCategory('新分类')).toEqual({ ok: false, reason: 'has_prompts', count: 1 })
+    store.removePrompts([store.prompts[0]!.id])
+    expect(store.removeCategory('新分类')).toEqual({ ok: true })
+  })
+
+  it('removes multiple prompts', () => {
+    const store = usePromptStore()
+    const a = store.addPrompt({ title: 'A', content: '1', category: '写作', tags: [] })
+    const b = store.addPrompt({ title: 'B', content: '2', category: '写作', tags: [] })
+    store.removePrompts([a.id, b.id])
+    expect(store.prompts).toHaveLength(0)
   })
 })

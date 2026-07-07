@@ -19,7 +19,7 @@ export default createRouter({
   routes: [
     { path: '/', name: 'list', component: () => import('@/views/PromptList.vue') },
     { path: '/prompt/new', name: 'new', component: () => import('@/views/PromptEdit.vue') },
-    { path: '/prompt/:id/edit', name: 'edit', component: () => import('@/views/PromptEdit.vue') },
+    { path: '/categories', name: 'categories', component: () => import('@/views/CategoryManage.vue') },
     { path: '/settings', name: 'settings', component: () => import('@/views/Settings.vue') },
   ],
 })

@@ -6,11 +6,17 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 
-const props = defineProps<{
-  modelValue: string
-  options: string[]
-  placeholder?: string
-}>()
+const props = withDefaults(
+  defineProps<{
+    modelValue: string
+    options: string[]
+    placeholder?: string
+    creatable?: boolean
+  }>(),
+  {
+    creatable: false,
+  },
+)
 
 const emit = defineEmits<{
   'update:modelValue': [value: string]
@@ -34,7 +40,7 @@ const filtered = computed(() => {
   }
 
   const list = props.options.filter((item) => item.toLowerCase().includes(q))
-  if (!props.options.some((item) => item.toLowerCase() === q)) {
+  if (props.creatable && !props.options.some((item) => item.toLowerCase() === q)) {
     return [`创建「${searchQuery.value.trim()}」`, ...list]
   }
   return list
@@ -75,7 +81,7 @@ function onBlur() {
 <template>
   <div class="relative">
     <input
-      class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
+      class="w-full rounded-xl border border-slate-200/80 bg-white px-3.5 py-2.5 text-sm shadow-sm outline-none transition placeholder:text-slate-400 focus:border-brand focus:ring-4 focus:ring-brand/10"
       :value="open ? searchQuery : modelValue"
       :placeholder="placeholder"
       @input="onInput"
@@ -84,12 +90,12 @@ function onBlur() {
     />
     <ul
       v-if="open && filtered.length"
-      class="absolute z-20 mt-1 max-h-48 w-full overflow-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+      class="absolute z-[60] mt-1.5 max-h-48 w-full overflow-auto rounded-xl border border-slate-200/80 bg-white py-1.5 shadow-card"
     >
       <li v-for="option in filtered" :key="option">
         <button
           type="button"
-          class="block w-full px-3 py-2 text-left text-sm hover:bg-slate-50"
+          class="block w-full px-3.5 py-2 text-left text-sm transition hover:bg-slate-50"
           :class="option.startsWith('创建「') ? 'text-brand' : 'text-slate-700'"
           @mousedown.prevent="selectOption(option)"
         >
