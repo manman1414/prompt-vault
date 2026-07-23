@@ -9,6 +9,7 @@
 - 一键复制到剪贴板
 - 本地自动保存
 - JSON 导入 / 导出备份
+- 桌面端自动更新（检查 GitHub Releases）
 
 ## 技术栈
 
@@ -84,5 +85,7 @@ git push origin v0.3.0   # 换成实际标签
 ```
 
 发版完成后，在 **Releases** 下载 Windows 安装包。
+
+发版产物需包含 `latest.yml`（及 `.blockmap`），供桌面端自动更新读取。
 
 > `package.json` 的 `version` 必须与 git 标签一致（如 `0.3.0` 对应 `v0.3.0`）。

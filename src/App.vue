@@ -8,7 +8,25 @@ import AppNav from '@/components/AppNav.vue'
 import AppStatusBar from '@/components/AppStatusBar.vue'
 import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
 import ToastHost from '@/components/ui/ToastHost.vue'
+import { setupUpdaterListener } from '@/composables/useUpdater'
+import { useToast } from '@/composables/useToast'
+import { onMounted, onUnmounted } from 'vue'
 import { RouterView } from 'vue-router'
+
+const toast = useToast()
+let stopUpdater: (() => void) | undefined
+
+onMounted(() => {
+  stopUpdater = setupUpdaterListener((payload) => {
+    if (payload.status === 'available') {
+      toast.info(`发现新版本 v${payload.version}，可到设置页更新`)
+    }
+  })
+})
+
+onUnmounted(() => {
+  stopUpdater?.()
+})
 </script>
 
 <template>
