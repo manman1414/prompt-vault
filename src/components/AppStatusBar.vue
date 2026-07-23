@@ -23,7 +23,5 @@ const version = __APP_VERSION__
     <span>v{{ version }}</span>
     <span class="text-slate-300" aria-hidden="true">·</span>
     <span>{{ promptCount }} 条提示词</span>
-    <span class="text-slate-300" aria-hidden="true">·</span>
-    <span>更新测试</span>
   </div>
 </template>

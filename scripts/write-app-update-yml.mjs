@@ -1,6 +1,5 @@
 /**
  * Write app-update.yml into unpacked Electron resources
- * Required by electron-updater when packaging with --publish never
  * @author prompt-vault team
  * @date 2026-07-23
  */
@@ -13,9 +12,8 @@ const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..')
 const resourcesDir = path.join(root, 'release', 'win-unpacked', 'resources')
 const target = path.join(resourcesDir, 'app-update.yml')
 
-const content = `provider: github
-owner: manman1414
-repo: prompt-vault
+const content = `provider: generic
+url: https://github.com/manman1414/prompt-vault/releases/latest/download/
 updaterCacheDirName: prompt-vault-updater
 `
 

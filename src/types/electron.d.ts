@@ -15,7 +15,14 @@ export type UpdaterStatus =
 export interface ElectronAPI {
   isElectron: true
   getVersion: () => Promise<string>
-  checkForUpdates: () => Promise<{ ok: boolean; reason?: string; message?: string; version?: string | null }>
+  checkForUpdates: () => Promise<{
+    ok: boolean
+    reason?: string
+    message?: string
+    status?: 'available' | 'not-available'
+    version?: string | null
+    currentVersion?: string
+  }>
   downloadUpdate: () => Promise<{ ok: boolean; reason?: string; message?: string }>
   installUpdate: () => Promise<{ ok: boolean; reason?: string; message?: string }>
   onUpdaterStatus: (callback: (payload: UpdaterStatus) => void) => () => void

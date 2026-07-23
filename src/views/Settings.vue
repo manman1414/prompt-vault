@@ -17,19 +17,23 @@ const toast = useToast()
 const fileInput = ref<HTMLInputElement | null>(null)
 const manualCheck = ref(false)
 
-const { isElectron, status, busy, progressPercent, checkForUpdates, downloadUpdate, installUpdate } =
+const { isElectron, status, currentVersion, busy, progressPercent, checkForUpdates, downloadUpdate, installUpdate } =
   useUpdater()
 
 const updateHint = computed(() => {
   const s = status.value
-  if (!s) return isElectron.value ? '可检查 GitHub Releases 上的新版本' : '自动更新仅桌面安装版可用'
+  const current = currentVersion.value ? `当前 v${currentVersion.value}` : ''
+  if (!s) {
+    if (!isElectron.value) return '自动更新仅桌面安装版可用'
+    return current ? `${current}。可检查 GitHub Releases 上的新版本` : '可检查 GitHub Releases 上的新版本'
+  }
   switch (s.status) {
     case 'checking':
-      return '正在检查更新…'
+      return current ? `${current}，正在检查更新…` : '正在检查更新…'
     case 'available':
-      return `发现新版本 v${s.version}，可下载安装`
+      return `${current || '当前版本'}，发现新版本 v${s.version}，可下载安装`
     case 'not-available':
-      return '当前已是最新版本'
+      return `${current || `v${s.version}`}，已是最新版本`
     case 'downloading':
       return `正在下载更新… ${progressPercent.value}%`
     case 'downloaded':
@@ -37,7 +41,7 @@ const updateHint = computed(() => {
     case 'error':
       return s.message
     default:
-      return ''
+      return current
   }
 })
 
@@ -144,7 +148,7 @@ async function handleInstallUpdate() {
 <template>
   <div>
     <h2 class="page-title">设置</h2>
-    <p class="page-desc mb-6">数据保存在本机，不会上传云端。建议定期导出 JSON 备份。当前为更新测试版本。</p>
+    <p class="page-desc mb-6">数据保存在本机，不会上传云端。建议定期导出 JSON 备份。</p>
 
     <div class="surface-card mb-5 p-5">
       <h3 class="mb-4 text-sm font-semibold text-slate-800">数据管理</h3>

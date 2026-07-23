@@ -9,6 +9,8 @@ const fs = require('fs')
 const path = require('path')
 
 const isDev = !app.isPackaged
+const UPDATE_FEED_URL = 'https://github.com/manman1414/prompt-vault/releases/latest/download/'
+
 let mainWindow = null
 let updaterReady = false
 
@@ -32,6 +34,20 @@ function sendUpdaterStatus(payload) {
   }
 }
 
+/** 简单 semver 比较：a > b 返回 1，相等 0，小于 -1 */
+function compareVersion(a, b) {
+  const pa = String(a).split('.').map((n) => Number(n) || 0)
+  const pb = String(b).split('.').map((n) => Number(n) || 0)
+  const len = Math.max(pa.length, pb.length)
+  for (let i = 0; i < len; i += 1) {
+    const x = pa[i] || 0
+    const y = pb[i] || 0
+    if (x > y) return 1
+    if (x < y) return -1
+  }
+  return 0
+}
+
 function setupAutoUpdater() {
   if (isDev) return
 
@@ -39,11 +55,10 @@ function setupAutoUpdater() {
   autoUpdater.autoDownload = false
   autoUpdater.autoInstallOnAppQuit = true
 
-  // 显式配置更新源，避免缺少 app-update.yml 时检查失败
+  // generic 直接读 latest.yml，比 GitHub API 更稳
   autoUpdater.setFeedURL({
-    provider: 'github',
-    owner: 'manman1414',
-    repo: 'prompt-vault',
+    provider: 'generic',
+    url: UPDATE_FEED_URL,
   })
 
   autoUpdater.on('checking-for-update', () => {
@@ -53,31 +68,30 @@ function setupAutoUpdater() {
   autoUpdater.on('update-available', (info) => {
     sendUpdaterStatus({
       status: 'available',
-      version: info.version,
-      releaseNotes: info.releaseNotes ?? null,
+      version: String(info.version || ''),
     })
   })
 
   autoUpdater.on('update-not-available', (info) => {
     sendUpdaterStatus({
       status: 'not-available',
-      version: info.version,
+      version: String(info.version || app.getVersion()),
     })
   })
 
   autoUpdater.on('download-progress', (progress) => {
     sendUpdaterStatus({
       status: 'downloading',
-      percent: progress.percent,
-      transferred: progress.transferred,
-      total: progress.total,
+      percent: Number(progress.percent) || 0,
+      transferred: Number(progress.transferred) || 0,
+      total: Number(progress.total) || 0,
     })
   })
 
   autoUpdater.on('update-downloaded', (info) => {
     sendUpdaterStatus({
       status: 'downloaded',
-      version: info.version,
+      version: String(info.version || ''),
     })
   })
 
@@ -103,7 +117,7 @@ function setupAutoUpdater() {
         silent: true,
       })
     })
-  }, 4000)
+  }, 5000)
 }
 
 function setupIpc() {
@@ -114,11 +128,34 @@ function setupIpc() {
       return { ok: false, reason: 'dev' }
     }
     const { autoUpdater } = require('electron-updater')
+    const currentVersion = app.getVersion()
     try {
       const result = await autoUpdater.checkForUpdates()
-      return { ok: true, version: result?.updateInfo?.version ?? null }
+      const remoteVersion = result?.updateInfo?.version
+        ? String(result.updateInfo.version)
+        : null
+
+      if (remoteVersion && compareVersion(remoteVersion, currentVersion) > 0) {
+        sendUpdaterStatus({ status: 'available', version: remoteVersion })
+        return {
+          ok: true,
+          status: 'available',
+          version: remoteVersion,
+          currentVersion,
+        }
+      }
+
+      sendUpdaterStatus({ status: 'not-available', version: currentVersion })
+      return {
+        ok: true,
+        status: 'not-available',
+        version: remoteVersion || currentVersion,
+        currentVersion,
+      }
     } catch (error) {
-      return { ok: false, reason: 'error', message: error?.message || String(error) }
+      const message = error?.message || String(error)
+      sendUpdaterStatus({ status: 'error', message })
+      return { ok: false, reason: 'error', message, currentVersion }
     }
   })
 
@@ -140,7 +177,6 @@ function setupIpc() {
       return { ok: false, reason: 'dev' }
     }
     const { autoUpdater } = require('electron-updater')
-    // 退出并安装
     setImmediate(() => autoUpdater.quitAndInstall(false, true))
     return { ok: true }
   })
