@@ -1,7 +1,7 @@
 {
   "name": "prompt-vault",
   "private": true,
-  "version": "0.3.8",
+  "version": "0.3.9",
   "author": "prompt-vault team",
   "description": "Local AI prompt manager",
   "main": "electron/main.cjs",
