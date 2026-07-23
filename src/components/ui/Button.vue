@@ -10,12 +10,14 @@ withDefaults(
     variant?: 'primary' | 'default' | 'danger' | 'ghost'
     size?: 'sm' | 'md'
     disabled?: boolean
+    loading?: boolean
   }>(),
   {
     type: 'button',
     variant: 'default',
     size: 'md',
     disabled: false,
+    loading: false,
   },
 )
 </script>
@@ -23,7 +25,7 @@ withDefaults(
 <template>
   <button
     :type="type"
-    class="inline-flex items-center justify-center rounded-xl border font-medium transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100"
+    class="inline-flex items-center justify-center gap-2 rounded-xl border font-medium transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100"
     :class="[
       size === 'sm' ? 'px-3 py-1.5 text-xs' : 'px-4 py-2.5 text-sm',
       variant === 'primary' &&
@@ -35,8 +37,13 @@ withDefaults(
       variant === 'ghost' &&
         'border-transparent bg-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-700',
     ]"
-    :disabled="disabled"
+    :disabled="disabled || loading"
   >
+    <span
+      v-if="loading"
+      class="size-3.5 shrink-0 animate-spin rounded-full border-2 border-current border-r-transparent"
+      aria-hidden="true"
+    />
     <slot />
   </button>
 </template>

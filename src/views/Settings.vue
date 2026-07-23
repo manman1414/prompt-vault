@@ -17,8 +17,18 @@ const toast = useToast()
 const fileInput = ref<HTMLInputElement | null>(null)
 const manualCheck = ref(false)
 
-const { isElectron, status, currentVersion, busy, progressPercent, checkForUpdates, downloadUpdate, installUpdate } =
-  useUpdater()
+const {
+  isElectron,
+  status,
+  currentVersion,
+  checking,
+  downloading,
+  busy,
+  progressPercent,
+  checkForUpdates,
+  downloadUpdate,
+  installUpdate,
+} = useUpdater()
 
 const updateHint = computed(() => {
   const s = status.value
@@ -175,17 +185,26 @@ async function handleInstallUpdate() {
       </div>
 
       <div class="flex flex-wrap gap-3">
-        <Button variant="primary" :disabled="busy" @click="handleCheckUpdate">检查更新</Button>
         <Button
-          v-if="status?.status === 'available'"
+          variant="primary"
+          :loading="checking"
+          :disabled="busy"
+          @click="handleCheckUpdate"
+        >
+          {{ checking ? '检查中…' : '检查更新' }}
+        </Button>
+        <Button
+          v-if="status?.status === 'available' || downloading"
+          :loading="downloading"
           :disabled="busy"
           @click="handleDownloadUpdate"
         >
-          下载更新
+          {{ downloading ? '下载中…' : '下载更新' }}
         </Button>
         <Button
           v-if="status?.status === 'downloaded'"
           variant="primary"
+          :disabled="busy"
           @click="handleInstallUpdate"
         >
           立即安装

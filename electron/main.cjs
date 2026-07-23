@@ -136,7 +136,7 @@ function setupIpc() {
         : null
 
       if (remoteVersion && compareVersion(remoteVersion, currentVersion) > 0) {
-        sendUpdaterStatus({ status: 'available', version: remoteVersion })
+        // 状态已由 update-available 事件推送，这里只返回结果，避免重复 toast
         return {
           ok: true,
           status: 'available',
@@ -145,7 +145,6 @@ function setupIpc() {
         }
       }
 
-      sendUpdaterStatus({ status: 'not-available', version: currentVersion })
       return {
         ok: true,
         status: 'not-available',

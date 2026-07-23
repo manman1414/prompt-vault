@@ -15,12 +15,15 @@ import { RouterView } from 'vue-router'
 
 const toast = useToast()
 let stopUpdater: (() => void) | undefined
+/** 同一版本只提示一次，避免事件重复触发双 toast */
+let lastNotifiedVersion = ''
 
 onMounted(() => {
   stopUpdater = setupUpdaterListener((payload) => {
-    if (payload.status === 'available') {
-      toast.info(`发现新版本 v${payload.version}，可到设置页更新`)
-    }
+    if (payload.status !== 'available') return
+    if (!payload.version || payload.version === lastNotifiedVersion) return
+    lastNotifiedVersion = payload.version
+    toast.info(`发现新版本 v${payload.version}，可到设置页更新`)
   })
 })
 
