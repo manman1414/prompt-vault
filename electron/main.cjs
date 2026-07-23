@@ -216,6 +216,9 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  // 更新测试标记（不影响界面，仅主进程日志）
+  console.log('[prompt-vault] boot', app.getVersion(), 'update-test-2026-07-23')
+
   Menu.setApplicationMenu(null)
   setupIpc()
   createWindow()
