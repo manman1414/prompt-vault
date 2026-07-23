@@ -39,6 +39,13 @@ function setupAutoUpdater() {
   autoUpdater.autoDownload = false
   autoUpdater.autoInstallOnAppQuit = true
 
+  // 显式配置更新源，避免缺少 app-update.yml 时检查失败
+  autoUpdater.setFeedURL({
+    provider: 'github',
+    owner: 'manman1414',
+    repo: 'prompt-vault',
+  })
+
   autoUpdater.on('checking-for-update', () => {
     sendUpdaterStatus({ status: 'checking' })
   })
@@ -75,9 +82,13 @@ function setupAutoUpdater() {
   })
 
   autoUpdater.on('error', (error) => {
+    const raw = error?.message || String(error)
+    const message = raw.includes('app-update.yml')
+      ? '更新配置缺失，请重新安装最新版本后重试'
+      : raw
     sendUpdaterStatus({
       status: 'error',
-      message: error?.message || String(error),
+      message,
     })
   })
 

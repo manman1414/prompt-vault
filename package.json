@@ -16,7 +16,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "electron:dev": "concurrently -k \"vite\" \"wait-on http://localhost:5173 && electron .\"",
-    "electron:build": "node scripts/clean-release.mjs && node scripts/generate-icon.mjs && pnpm build && electron-builder --win --dir --publish never && node scripts/patch-exe-icon.mjs && electron-builder --prepackaged release/win-unpacked --win nsis --publish never",
+    "electron:build": "node scripts/clean-release.mjs && node scripts/generate-icon.mjs && pnpm build && electron-builder --win --dir --publish never && node scripts/patch-exe-icon.mjs && node scripts/write-app-update-yml.mjs && electron-builder --prepackaged release/win-unpacked --win nsis --publish never",
     "release": "node scripts/release.mjs",
     "release:verify": "node scripts/verify-release.mjs"
   },
