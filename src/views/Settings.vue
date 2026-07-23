@@ -144,7 +144,7 @@ async function handleInstallUpdate() {
 <template>
   <div>
     <h2 class="page-title">设置</h2>
-    <p class="page-desc mb-6">数据保存在本机，不会上传云端。建议定期导出 JSON 备份。</p>
+    <p class="page-desc mb-6">数据保存在本机，不会上传云端。建议定期导出 JSON 备份。当前为更新测试版本。</p>
 
     <div class="surface-card mb-5 p-5">
       <h3 class="mb-4 text-sm font-semibold text-slate-800">数据管理</h3>
